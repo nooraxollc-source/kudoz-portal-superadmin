@@ -2842,6 +2842,72 @@ body.superadmin-body .auth-card-title {
   padding: 1.25rem !important;
 }
 
+/* ==========================================================================
+   Dynamic Working Branch Selector & Visual Beacons
+   ========================================================================== */
+.sa-branch-selector-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 9999px;
+  padding: 0.25rem 0.65rem 0.25rem 0.85rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.sa-branch-label-lead {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sa-branch-select {
+  background: #090d16 !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  color: #f8fafc !important;
+  font-family: monospace !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  padding: 0.25rem 0.65rem !important;
+  border-radius: 6px !important;
+  cursor: pointer;
+  outline: none;
+}
+
+.sa-branch-select:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3) !important;
+}
+
+.sa-branch-refresh-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sa-branch-refresh-btn:hover {
+  color: #38bdf8;
+  transform: rotate(45deg);
+}
+
+.sa-target-branch-text {
+  font-family: monospace;
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+
 
 
     /* Standalone Superadmin Shell Tweaks */
@@ -3019,7 +3085,15 @@ body.superadmin-body .auth-card-title {
       <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
         <span class="sa-root-badge">🛡️ SUPERADMIN MASTER AUTHENTICATED</span>
         <span style="font-size: 0.85rem; color: #cbd5e1;">Target Core Repo: <code id="saCoreRepoBadge">nooraxollc-source/kudoz-ai-v3.1</code></span>
-        <span style="font-size: 0.85rem; color: #cbd5e1;">Active Branch: <code id="saBranchBadge" style="color: #38bdf8;">DevelopmentV3.2</code></span>
+        
+        <!-- Dynamic Target Branch Selector -->
+        <div class="sa-branch-selector-wrap">
+          <span class="sa-branch-label-lead">🌿 Target Branch:</span>
+          <select id="saHeaderBranchSelect" class="sa-branch-select" onchange="window.KudozSuperadmin && window.KudozSuperadmin.handleBranchDropdownChange(this.value)">
+            <option value="DevelopmentV3.2">DevelopmentV3.2 (Active)</option>
+          </select>
+          <button type="button" class="sa-branch-refresh-btn" title="Fetch live branches from repository via PAT" onclick="window.KudozSuperadmin && window.KudozSuperadmin.fetchAvailableBranches()">🔄</button>
+        </div>
       </div>
       <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
         <button type="button" id="saTokenStatusBtn" class="sa-token-badge-btn pending" onclick="window.KudozSuperadmin && window.KudozSuperadmin.openTokenModal()">
@@ -3249,7 +3323,7 @@ body.superadmin-body .auth-card-title {
         <div id="saOnboardProgressBox" class="sa-api-progress-box" style="display: none;">
           <div style="font-weight: 700; color: #38bdf8; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
             <span class="btn-spinner" style="display: inline-block;"></span>
-            <span>Provisioning Tenant on GitHub (DevelopmentV3.2)...</span>
+            <span>Provisioning Tenant on GitHub (<span class="sa-target-branch-text">DevelopmentV3.2</span>)...</span>
           </div>
           <div id="saProgStep1" class="sa-progress-step-item">⏳ Step 1/3: Committing tenant record to config/tenants.json...</div>
           <div id="saProgStep2" class="sa-progress-step-item">⏳ Step 2/3: Creating public deployment repository...</div>
@@ -3496,7 +3570,7 @@ body.superadmin-body .auth-card-title {
             </div>
             <div class="sa-val-row">
               <span class="sa-val-key">Target Git Branch:</span>
-              <code class="sa-val-data" style="color: #38bdf8;">DevelopmentV3.2</code>
+              <code class="sa-val-data" id="saJobsReviewBranch" style="color: #38bdf8;">DevelopmentV3.2</code>
             </div>
           </div>
 
@@ -3531,7 +3605,7 @@ body.superadmin-body .auth-card-title {
           <div class="sa-done-icon">🚀</div>
           <div>
             <h3 class="sa-done-title" id="saJobsDoneTitle">Pipeline Successfully Dispatched!</h3>
-            <p class="sa-done-sub" id="saJobsDoneSub">GitHub Actions workflow daily_batch_pipeline.yml was triggered on branch DevelopmentV3.2.</p>
+            <p class="sa-done-sub" id="saJobsDoneSub">GitHub Actions workflow daily_batch_pipeline.yml was triggered on branch <span class="sa-target-branch-text">DevelopmentV3.2</span>.</p>
           </div>
         </div>
 
@@ -3581,7 +3655,7 @@ body.superadmin-body .auth-card-title {
       <div class="sa-card-header">
         <div>
           <h3 class="sa-card-title"><span>🔑</span> Guided Passkey Rotation Wizard</h3>
-          <p class="sa-card-desc">Interactive 3-step cryptographic rotation. Re-hashes credentials via SHA-256 and commits updates directly to <code>config/tenants.json</code> on <code>DevelopmentV3.2</code>.</p>
+          <p class="sa-card-desc">Interactive 3-step cryptographic rotation. Re-hashes credentials via SHA-256 and commits updates directly to <code>config/tenants.json</code> on <span class="sa-target-branch-text">DevelopmentV3.2</span>.</p>
         </div>
       </div>
 
@@ -3664,7 +3738,7 @@ body.superadmin-body .auth-card-title {
             <span class="step-badge">STEP 3</span>
             <span>Cryptographic Verification & Repository Commit</span>
           </div>
-          <p class="sa-wizard-step-desc">Review the cryptographic parameters before committing updates to <code>config/tenants.json</code> on <code>DevelopmentV3.2</code>.</p>
+          <p class="sa-wizard-step-desc">Review the cryptographic parameters before committing updates to <code>config/tenants.json</code> on <span class="sa-target-branch-text">DevelopmentV3.2</span>.</p>
 
           <div class="sa-entered-values-table" style="margin-bottom: 1.5rem;">
             <div class="sa-val-row">
@@ -3681,12 +3755,12 @@ body.superadmin-body .auth-card-title {
             </div>
             <div class="sa-val-row">
               <span class="sa-val-key">Target Git Branch:</span>
-              <code class="sa-val-data" style="color: #38bdf8;">DevelopmentV3.2</code>
+              <code class="sa-val-data" id="saResetsReviewBranch" style="color: #38bdf8;">DevelopmentV3.2</code>
             </div>
           </div>
 
           <button type="button" id="btnSaResetPasskey" class="sa-btn sa-btn-primary" onclick="window.KudozSuperadmin.executePasskeyResetSubmit()">
-            <span>💾</span> Re-Hash & Commit Passkey to DevelopmentV3.2
+            <span>💾</span> Re-Hash & Commit Passkey to <span class="sa-target-branch-text">DevelopmentV3.2</span>
             <span id="saResetSpinner" class="btn-spinner" style="display: none;"></span>
           </button>
         </div>
@@ -3708,7 +3782,7 @@ body.superadmin-body .auth-card-title {
           <div class="sa-done-icon">🔑</div>
           <div>
             <h3 class="sa-done-title">Passkey Rotated & Committed!</h3>
-            <p class="sa-done-sub">Updated SHA-256 hash has been committed to config/tenants.json on DevelopmentV3.2.</p>
+            <p class="sa-done-sub">Updated SHA-256 hash has been committed to config/tenants.json on <span class="sa-target-branch-text">DevelopmentV3.2</span>.</p>
           </div>
         </div>
 
@@ -3743,7 +3817,7 @@ body.superadmin-body .auth-card-title {
       <div class="sa-card-header">
         <div>
           <h3 class="sa-card-title"><span>📝</span> Dynamic Form Builder & Role RBAC Studio</h3>
-          <p class="sa-card-desc">Configure per-role form permissions (Student, Parent, Admin) and generate dynamic questionnaire schemas stored on <code>DevelopmentV3.2</code>.</p>
+          <p class="sa-card-desc">Configure per-role form permissions (Student, Parent, Admin) and generate dynamic questionnaire schemas stored on <span class="sa-target-branch-text">DevelopmentV3.2</span>.</p>
         </div>
       </div>
 
@@ -3783,7 +3857,7 @@ body.superadmin-body .auth-card-title {
           </div>
 
           <button type="button" class="sa-btn sa-btn-primary" onclick="window.KudozSuperadmin.saveFormRbacMatrix()">
-            <span>💾</span> Save & Apply RBAC Matrix (DevelopmentV3.2)
+            <span>💾</span> Save & Apply RBAC Matrix (<span class="sa-target-branch-text">DevelopmentV3.2</span>)
           </button>
         </div>
 
@@ -3850,7 +3924,7 @@ body.superadmin-body .auth-card-title {
           </div>
 
           <button type="button" id="btnPublishFormSchema" class="sa-btn sa-btn-primary" onclick="window.KudozSuperadmin.addNewCustomFormDefinition()">
-            <span>✨</span> Publish Form Schema to DevelopmentV3.2
+            <span>✨</span> Publish Form Schema to <span class="sa-target-branch-text">DevelopmentV3.2</span>
             <span id="saFormsSpinner" class="btn-spinner" style="display: none;"></span>
           </button>
         </div>
@@ -4012,7 +4086,7 @@ body.superadmin-body .auth-card-title {
             <span class="step-badge">STEP 3</span>
             <span>Ingestion Review & Commit</span>
           </div>
-          <p class="sa-wizard-step-desc">Review destination path and commit the document to the repository on branch <code>DevelopmentV3.2</code>.</p>
+          <p class="sa-wizard-step-desc">Review destination path and commit the document to the repository on branch <span class="sa-target-branch-text">DevelopmentV3.2</span>.</p>
 
           <div class="sa-entered-values-table" style="margin-bottom: 1.5rem;">
             <div class="sa-val-row">
@@ -4029,12 +4103,12 @@ body.superadmin-body .auth-card-title {
             </div>
             <div class="sa-val-row">
               <span class="sa-val-key">Target Git Branch:</span>
-              <code class="sa-val-data" style="color: #38bdf8;">DevelopmentV3.2</code>
+              <code class="sa-val-data" id="saDocsReviewBranch" style="color: #38bdf8;">DevelopmentV3.2</code>
             </div>
           </div>
 
           <button type="button" id="btnIngestDocument" class="sa-btn sa-btn-primary" onclick="window.KudozSuperadmin.executeDocumentIngestionSubmit()">
-            <span>💾</span> Ingest & Commit Document to DevelopmentV3.2
+            <span>💾</span> Ingest & Commit Document to <span class="sa-target-branch-text">DevelopmentV3.2</span>
             <span id="saDocsSpinner" class="btn-spinner" style="display: none;"></span>
           </button>
         </div>
@@ -4198,7 +4272,7 @@ body.superadmin-body .auth-card-title {
 
           <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
             <button type="button" id="btnSaveRateConfig" class="sa-btn sa-btn-primary" onclick="window.KudozSuperadmin.saveRateConfiguration()">
-              <span>💾</span> Save Rates & Quotas (DevelopmentV3.2)
+              <span>💾</span> Save Rates & Quotas (<span class="sa-target-branch-text">DevelopmentV3.2</span>)
             </button>
             <button type="button" id="btnResetRateOverride" class="sa-btn" style="display: none;" onclick="window.KudozSuperadmin.clearRateOverride()">
               <span>↩️</span> Revert to Global Rates
@@ -4223,7 +4297,7 @@ body.superadmin-body .auth-card-title {
           <div class="sa-done-icon">💳</div>
           <div>
             <h3 class="sa-done-title">Rates & Quotas Configuration Active!</h3>
-            <p class="sa-done-sub">Pricing and hard lockout guardrails have been committed to DevelopmentV3.2.</p>
+            <p class="sa-done-sub">Pricing and hard lockout guardrails have been committed to <span class="sa-target-branch-text">DevelopmentV3.2</span>.</p>
           </div>
         </div>
 
@@ -4296,23 +4370,23 @@ body.superadmin-body .auth-card-title {
 
   </div>
 
-  <!-- Administrative GitHub Token Session Modal -->
+  <!-- Administrative GitHub Token & Target Branch Session Modal -->
   <div id="saTokenModal" class="kudoz-plan-modal-overlay" style="display: none;" onclick="if(event.target===this) window.KudozSuperadmin.closeTokenModal()">
-    <div class="kudoz-plan-modal-dialog" style="max-width: 580px; background: #0d131f; border: 1px solid rgba(245, 158, 11, 0.35); box-shadow: 0 16px 50px rgba(0,0,0,0.8);">
+    <div class="kudoz-plan-modal-dialog" style="max-width: 600px; background: #0d131f; border: 1px solid rgba(245, 158, 11, 0.35); box-shadow: 0 16px 50px rgba(0,0,0,0.8);">
       <div class="plan-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
         <div>
           <span class="modal-badge" style="background: rgba(245,158,11,0.2); border: 1px solid #f59e0b; color: #fef3c7;">CRYPTOGRAPHIC API ACCESS</span>
           <h3 style="margin-top: 0.35rem; color: #f8fafc; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🔑</span> Administrative GitHub Token Manager
+            <span>🔑</span> Administrative PAT & Target Branch Manager
           </h3>
-          <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Configure session token to create public repos, enable GitHub Pages & dispatch pipelines on <code style="color: #38bdf8;">DevelopmentV3.2</code>.</p>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">Configure session token and select which repository branch will receive commits and workflow triggers.</p>
         </div>
         <button type="button" class="btn-plan-close" onclick="window.KudozSuperadmin.closeTokenModal()">✕</button>
       </div>
 
       <div class="plan-modal-body" style="padding: 1.25rem;">
         <div id="saTokenModalNotice" style="margin-bottom: 1rem; padding: 0.75rem; border-radius: 8px; font-size: 0.82rem; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: #bae6fd;">
-          💡 <strong>Session Storage Only:</strong> Tokens entered here are stored in browser memory/session only and are never published or sent to third parties.
+          💡 <strong>Private Repo Branch Access:</strong> Because the Superadmin portal runs client-side, your PAT is required to query private repository branches and commit configuration changes.
         </div>
 
         <div class="sa-form-group">
@@ -4321,7 +4395,25 @@ body.superadmin-body .auth-card-title {
             <input type="password" id="saManualTokenInput" class="sa-input" placeholder="ghp_... or github_pat_..." style="font-family: monospace;" />
             <button type="button" class="btn-toggle-eye" onclick="toggleFieldVisibility('saManualTokenInput', this)">👁️</button>
           </div>
-          <p style="font-size: 0.76rem; color: #64748b; margin-top: 0.35rem;">Required Scopes: <code>repo</code> (Full control of repositories) and <code>workflow</code> (Trigger GitHub Actions).</p>
+          <p style="font-size: 0.76rem; color: #64748b; margin-top: 0.35rem;">Required Scopes: <code>repo</code> (Full control) and <code>workflow</code> (GitHub Actions).</p>
+        </div>
+
+        <div class="sa-form-group" style="margin-top: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label class="sa-label" for="saModalBranchSelect" style="margin: 0;">Target Working Branch</label>
+            <button type="button" class="sa-btn sa-btn-xs" onclick="window.KudozSuperadmin.fetchAvailableBranches()">
+              <span>🔄</span> Fetch Repo Branches
+            </button>
+          </div>
+          <select id="saModalBranchSelect" class="sa-select" onchange="window.KudozSuperadmin.handleBranchDropdownChange(this.value)">
+            <option value="DevelopmentV3.2">DevelopmentV3.2</option>
+            <option value="development">development (Phase 5)</option>
+            <option value="main">main (Phase 6 / Launch)</option>
+            <option value="__custom__">➕ Type Custom Branch Name...</option>
+          </select>
+          <div id="saCustomBranchWrap" style="display: none; margin-top: 0.5rem;">
+            <input type="text" id="saCustomBranchInput" class="sa-input" placeholder="Enter branch name (e.g. feature-v3.3)" oninput="window.KudozSuperadmin.handleCustomBranchInput(this.value)" />
+          </div>
         </div>
 
         <div id="saTokenValidationResult" style="margin-top: 1rem; font-size: 0.84rem; display: none;"></div>
@@ -4332,7 +4424,7 @@ body.superadmin-body .auth-card-title {
         <div style="display: flex; gap: 0.75rem;">
           <button type="button" class="sa-btn" onclick="window.KudozSuperadmin.closeTokenModal()">Cancel</button>
           <button type="button" id="btnSaveSaToken" class="sa-btn sa-btn-primary" onclick="window.KudozSuperadmin.saveAndValidateSessionToken()">
-            <span>🔒</span> Save & Connect PAT
+            <span>🔒</span> Save & Connect
           </button>
         </div>
       </div>
@@ -4361,8 +4453,8 @@ body.superadmin-body .auth-card-title {
 </div>
 
 <script>
-  window.MANIFEST = {"generated_at": "2026-09-19T12:10:11.008494+00:00", "settings": {"global_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "global_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}}, "all_tenants": [{"tenant_id": "tenant_9019162", "display_name": "M Rohaan", "public_repo": "kudoz-portal-9019162", "active": true, "created_at": "2026-09-04", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}, {"tenant_id": "tenant_9614932", "display_name": "Rayyan", "public_repo": "kudoz-portal-tenant_9614932", "active": true, "created_at": "2026-09-04", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}, {"tenant_id": "tenant_9250202", "display_name": "Noor Ul Ain", "public_repo": "kudoz-portal-tenant_9250202", "active": true, "created_at": "2026-09-04", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}, {"tenant_id": "tenant_demo", "display_name": "demoTenant", "public_repo": "kudoz-portal-demo", "active": true, "created_at": "2026-09-06", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}], "all_billing_ledgers": {"tenant_9019162": {"tenant_id": "tenant_9019162", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0, "used_tokens": 0, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T10:47:52.552960+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": []}, "tenant_9614932": {"tenant_id": "tenant_9614932", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0, "used_tokens": 0, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T10:47:52.553765+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": []}, "tenant_9250202": {"tenant_id": "tenant_9250202", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0, "used_tokens": 0, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T10:47:52.554237+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": []}, "tenant_demo": {"tenant_id": "tenant_demo", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0487, "used_tokens": 7344, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T09:17:05.803984+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": [{"timestamp": "2026-09-19T09:14:53.645091+00:00", "report_type": "executive_report", "report_file": "Productivity_Report_2026-09-19.pdf", "input_tokens": 2319, "output_tokens": 872, "total_tokens": 3191, "cost_usd": 0.0153}, {"timestamp": "2026-09-19T09:14:53.645354+00:00", "report_type": "kids_summary", "report_file": "Summary_For_Kids_2026-09-19.pdf", "input_tokens": 2278, "output_tokens": 424, "total_tokens": 2702, "cost_usd": 0.0083}, {"timestamp": "2026-09-19T09:17:05.803932+00:00", "report_type": "weekly_reward", "report_file": "Weekly_Reward_Report_V2_2026-09-19.pdf", "input_tokens": 592, "output_tokens": 859, "total_tokens": 1451, "cost_usd": 0.0251}]}}, "all_reference_materials": {"tenant_9019162": {"tenant_id": "tenant_9019162", "total_documents": 3, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 1, "deadlines": 1, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [{"file_name": "timetable.txt", "relative_path": "timetable.txt", "extension": ".txt", "category": "routines", "category_label": "Routines & Timetables", "size_bytes": 1, "size_kb": 0.0, "modified_timestamp": 1789819795.3122718, "snippet": ""}], "deadlines": [{"file_name": "deadlines.json", "relative_path": "deadlines.json", "extension": ".json", "category": "deadlines", "category_label": "Exams & Deadlines", "size_bytes": 2845, "size_kb": 2.78, "modified_timestamp": 1789819795.308271, "snippet": "{\n  \"academic_session\": \"2026-2027\",\n  \"date_modified\": \"2026-09-05\",\n  \"deadlines\": [\n    {\n      \"serial_number\": \"01\",\n      \"subject\": \"English\",\n      \"syllabus\": \"Ch 1-10 &Grammar\",\n      \"deadline_notebook\": \"2026-09-10\",\n      \"deadline_tests\": \"2026-09-15\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"02\",\n      \"subject\": \"Physics\",\n      \"syllabus\": \"Ch 1, 2, 3, 4 & 7\",\n      \"deadline_notebook\": \"2026-09-06\",\n      \"deadline_tests\": \"2026-09-15\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"03\",\n      \"subject\": \"Chemistry\",\n      \"syllabus\": \"Ch 1, 2, 3 & Ch 4\",\n      \"deadline_notebook\": \"2026-09-08\",\n      \"deadline_tests\": \"2026-09-11\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"04\",\n      \"subject\": \"Computer\",\n      \"syllabus\": \"Ch 1, 2, 4 & 5\",\n      \"deadline_notebook\": \"2026-08-31\",\n      \"deadline_tests\": \"2026-09-18\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"05\",\n      \"subject\": \"Urdu\",\n      \"syllabus\": \"2 Ghazals & 01 Ch\",\n      \"deadline_notebook\": \"2026-09-20\",\n      \"deadline_tests\": \"2026-09-25\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"06\",\n      \"subject\": \"Islamiat\",\n      \"syllabus\": \"Surah Infaal 06 Asbaaq\",\n      \"deadline_notebook\": \"2026-09-10\",\n      \"deadline_tests\": \"2026-09-17\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"07\",\n      \"subject\": \"Ma"}], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 483, "size_kb": 0.47, "modified_timestamp": 1789819795.3082368, "snippet": "{\n  \"tenant_id\": \"tenant_9019162\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0,\n  \"used_tokens\": 0,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T10:47:52.552960+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": []\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}, "tenant_9614932": {"tenant_id": "tenant_9614932", "total_documents": 1, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 0, "deadlines": 0, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [], "deadlines": [], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 483, "size_kb": 0.47, "modified_timestamp": 1789819795.3131518, "snippet": "{\n  \"tenant_id\": \"tenant_9614932\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0,\n  \"used_tokens\": 0,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T10:47:52.553765+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": []\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}, "tenant_9250202": {"tenant_id": "tenant_9250202", "total_documents": 1, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 0, "deadlines": 0, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [], "deadlines": [], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 483, "size_kb": 0.47, "modified_timestamp": 1789819795.3124063, "snippet": "{\n  \"tenant_id\": \"tenant_9250202\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0,\n  \"used_tokens\": 0,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T10:47:52.554237+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": []\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}, "tenant_demo": {"tenant_id": "tenant_demo", "total_documents": 2, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 0, "deadlines": 1, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [], "deadlines": [{"file_name": "deadlines.json", "relative_path": "deadlines.json", "extension": ".json", "category": "deadlines", "category_label": "Exams & Deadlines", "size_bytes": 3418, "size_kb": 3.34, "modified_timestamp": 1789819795.317701, "snippet": "{\n  \"academic_session\": \"2026-2027\",\n  \"date_modified\": \"September 05, 2026\",\n  \"deadlines\": [\n    {\n      \"serial_number\": \"01\",\n      \"subject\": \"English\",\n      \"syllabus\": \"Ch 1-10 &Grammar\",\n      \"deadline_notebook\": \"10 Sep, 2026\",\n      \"deadline_tests\": \"15 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"02\",\n      \"subject\": \"Physics\",\n      \"syllabus\": \"Ch 1, 2, 3, 4 & 7\",\n      \"deadline_notebook\": \"06 Sep, 2026\",\n      \"deadline_tests\": \"15 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"03\",\n      \"subject\": \"Chemistry\",\n      \"syllabus\": \"Ch 1, 2, 3 & Ch 4\",\n      \"deadline_notebook\": \"08 Sep, 2026\",\n      \"deadline_tests\": \"11 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"04\",\n      \"subject\": \"Computer\",\n      \"syllabus\": \"Ch 1, 2, 4 & 5\",\n      \"deadline_notebook\": \"31 Aug, 2026\",\n      \"deadline_tests\": \"18 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"05\",\n      \"subject\": \"Urdu\",\n      \"syllabus\": \"2 Ghazals & 01 Ch\",\n      \"deadline_notebook\": \"20 Sep, 2026\",\n      \"deadline_tests\": \"25 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"06\",\n      \"subject\": \"Islamiat\",\n      \"syllabus\": \"Surah Infaal 06 Asbaaq\",\n      \"deadline_notebook\": \"10 Sep, 2026\",\n      \"deadline_tests\": \"17 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_num"}], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 1312, "size_kb": 1.28, "modified_timestamp": 1789819795.317336, "snippet": "{\n  \"tenant_id\": \"tenant_demo\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0487,\n  \"used_tokens\": 7344,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T09:17:05.803984+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": [\n    {\n      \"timestamp\": \"2026-09-19T09:14:53.645091+00:00\",\n      \"report_type\": \"executive_report\",\n      \"report_file\": \"Productivity_Report_2026-09-19.pdf\",\n      \"input_tokens\": 2319,\n      \"output_tokens\": 872,\n      \"total_tokens\": 3191,\n      \"cost_usd\": 0.0153\n    },\n    {\n      \"timestamp\": \"2026-09-19T09:14:53.645354+00:00\",\n      \"report_type\": \"kids_summary\",\n      \"report_file\": \"Summary_For_Kids_2026-09-19.pdf\",\n      \"input_tokens\": 2278,\n      \"output_tokens\": 424,\n      \"total_tokens\": 2702,\n      \"cost_usd\": 0.0083\n    },\n    {\n      \"timestamp\": \"2026-09-19T09:17:05.803932+00:00\",\n      \"report_type\": \"weekly_reward\",\n      \"report_file\": \"Weekly_Reward_Report_V2_2026-09-19.pdf\",\n      \"input_tokens\": 592,\n      \"output_tokens\": 859,\n      \"total_tokens\": 1451,\n      \"cost_usd\": 0.0251\n    }\n  ]\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}}, "forms_registry": {"forms": [{"id": "daily_tracker", "title": "Daily Quest & Learning Commitment Tracker", "description": "Student daily habit review, goal commitments, and ActivityWatch telemetry synchronization.", "icon": "\ud83c\udfae", "default_roles": ["student", "admin"], "enabled": true, "is_system": true, "fields": []}, {"id": "academic_progress", "title": "Academic Progress & Test Scores Log", "description": "Parent & mentor log of test scores, syllabus coverage, and academic milestones.", "icon": "\ud83d\udcda", "default_roles": ["parent", "admin"], "enabled": true, "is_system": true, "fields": []}, {"id": "parent_feedback", "title": "Parent Observation & Weekly Quest Evaluation", "description": "Qualitative feedback on student focus, screen time balance, and bedtime discipline.", "icon": "\ud83d\udc65", "default_roles": ["parent", "admin"], "enabled": true, "is_system": true, "fields": []}], "custom_forms": []}, "changelog": {"version": "3.2.0", "codename": "Enterprise Control & Dynamic Provisioning", "release_date": "2026-09-19", "highlights": ["Web-native Superadmin Control Plane with complete tenant onboarding & password management", "Live GitHub Actions workflow monitoring and dispatch directly within the portal", "Dynamic reference document ingestion supporting the 6-tier architecture defined in readme.txt", "Declarative Superadmin Form Builder with role-based access control and tenant customization", "Resource & AI token optimization with per-tenant billing ledgers and automated account lockout", "Interactive dynamic Change Log and enterprise-grade UI/UX refinement"], "categories": [{"title": "Superadmin Onboarding & Centralized Control", "icon": "\ud83d\udee1\ufe0f", "items": ["Migrated tenant onboarding entirely to the web frontend under the Superadmin role.", "Introduced live CI/CD pipeline monitoring dashboard for GitHub Actions batch runs with execution logs.", "Enabled in-portal tenant passkey resets with client-side SHA-256 and AES re-derivation.", "Deprecated and removed manual reset-tenant-passkey.yml workflow."]}, {"title": "Dynamic Tenant Provisioning", "icon": "\ud83d\udcc2", "items": ["Implemented dynamic multi-format (.pdf, .txt, .json, .md, .csv) reference document scanning per readme.txt.", "Automatic classification into 6 context buckets: App Classification Rules, Student Persona, Milestones, Routines, Exams & Deadlines, and General Reference.", "Seamless injection of tenant context into AI habit coaching and telemetry insights engines."]}, {"title": "Superadmin Form Builder & RBAC", "icon": "\ud83d\udcdd", "items": ["Superadmin role-based access control to show, hide, and manage forms per role (Student, Parent, Admin).", "Declarative JSON Schema Form Builder allowing dynamic creation of custom feedback and quest forms.", "Tenant-specific form overrides stored in data/{tenant_id}/forms_config.json."]}, {"title": "Resource Optimization & Billing Thresholds", "icon": "\u26a1", "items": ["Optimized Gemini prompt architecture and pre-aggregated telemetry, cutting token consumption by 35%\u201350%.", "Per-tenant, per-report billing ledger tracking usage against monthly credit thresholds.", "Multi-role warning notifications at 75% and 90% budget utilization.", "Hard constraint automated account lockout when a tenant reaches 100% billing allocation."]}, {"title": "Version Visibility & Enterprise UI", "icon": "\u2728", "items": ["Dynamic Change Log modal accessible directly from the login hero badge.", "Modern enterprise design system with refined typography, micro-interactions, and accessible contrast."]}]}};
-  window.ENV_CONFIG = {"core_repo": "nooraxollc-source/kudoz-ai-v3.1", "branch": "DevelopmentV3.2", "superadmin_hash": "861b3c167d30e87c831b461d37aded9f6405d6dfea9d312697487f8032921b06", "token_admin": "X1s+bICNyiNwot3yJmT3oLBC61olFgoX5WwkyoJoU4Gniq+Ul+g7812g2d9Vuahk/AexOkJjRGV3DkD1uxjW99Eskluecbp1TvETHbCWVjMiZCy6ZDXMLgiwkJIqfis8KBYYbgOV2itidwoL364agg=="};
+  window.MANIFEST = {"generated_at": "2026-09-19T12:33:39.330967+00:00", "settings": {"global_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "global_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}}, "all_tenants": [{"tenant_id": "tenant_9019162", "display_name": "M Rohaan", "public_repo": "kudoz-portal-9019162", "active": true, "created_at": "2026-09-04", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}, {"tenant_id": "tenant_9614932", "display_name": "Rayyan", "public_repo": "kudoz-portal-tenant_9614932", "active": true, "created_at": "2026-09-04", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}, {"tenant_id": "tenant_9250202", "display_name": "Noor Ul Ain", "public_repo": "kudoz-portal-tenant_9250202", "active": true, "created_at": "2026-09-04", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}, {"tenant_id": "tenant_demo", "display_name": "demoTenant", "public_repo": "kudoz-portal-demo", "active": true, "created_at": "2026-09-06", "schedule_override": null, "rates_override": null, "effective_rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "rates_is_overridden": false, "effective_schedule": {"default_run_time_utc": "05:00", "enabled_days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"], "rewards_day": "saturday", "timezone": "UTC"}, "schedule_is_overridden": false}], "all_billing_ledgers": {"tenant_9019162": {"tenant_id": "tenant_9019162", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0, "used_tokens": 0, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T10:47:52.552960+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": []}, "tenant_9614932": {"tenant_id": "tenant_9614932", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0, "used_tokens": 0, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T10:47:52.553765+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": []}, "tenant_9250202": {"tenant_id": "tenant_9250202", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0, "used_tokens": 0, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T10:47:52.554237+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": []}, "tenant_demo": {"tenant_id": "tenant_demo", "currency": "USD", "allocated_credits": 15.0, "allocated_tokens": 150000, "used_credits": 0.0487, "used_tokens": 7344, "warning_threshold_pct": 75, "critical_threshold_pct": 90, "account_locked": false, "lock_reason": null, "last_updated": "2026-09-19T09:17:05.803984+00:00", "rates": {"executive_report": 0.015, "kids_summary": 0.008, "weekly_reward": 0.025, "token_cost_per_1k": 0.0001}, "transactions": [{"timestamp": "2026-09-19T09:14:53.645091+00:00", "report_type": "executive_report", "report_file": "Productivity_Report_2026-09-19.pdf", "input_tokens": 2319, "output_tokens": 872, "total_tokens": 3191, "cost_usd": 0.0153}, {"timestamp": "2026-09-19T09:14:53.645354+00:00", "report_type": "kids_summary", "report_file": "Summary_For_Kids_2026-09-19.pdf", "input_tokens": 2278, "output_tokens": 424, "total_tokens": 2702, "cost_usd": 0.0083}, {"timestamp": "2026-09-19T09:17:05.803932+00:00", "report_type": "weekly_reward", "report_file": "Weekly_Reward_Report_V2_2026-09-19.pdf", "input_tokens": 592, "output_tokens": 859, "total_tokens": 1451, "cost_usd": 0.0251}]}}, "all_reference_materials": {"tenant_9019162": {"tenant_id": "tenant_9019162", "total_documents": 3, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 1, "deadlines": 1, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [{"file_name": "timetable.txt", "relative_path": "timetable.txt", "extension": ".txt", "category": "routines", "category_label": "Routines & Timetables", "size_bytes": 1, "size_kb": 0.0, "modified_timestamp": 1789821204.0597274, "snippet": ""}], "deadlines": [{"file_name": "deadlines.json", "relative_path": "deadlines.json", "extension": ".json", "category": "deadlines", "category_label": "Exams & Deadlines", "size_bytes": 2845, "size_kb": 2.78, "modified_timestamp": 1789821204.0527608, "snippet": "{\n  \"academic_session\": \"2026-2027\",\n  \"date_modified\": \"2026-09-05\",\n  \"deadlines\": [\n    {\n      \"serial_number\": \"01\",\n      \"subject\": \"English\",\n      \"syllabus\": \"Ch 1-10 &Grammar\",\n      \"deadline_notebook\": \"2026-09-10\",\n      \"deadline_tests\": \"2026-09-15\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"02\",\n      \"subject\": \"Physics\",\n      \"syllabus\": \"Ch 1, 2, 3, 4 & 7\",\n      \"deadline_notebook\": \"2026-09-06\",\n      \"deadline_tests\": \"2026-09-15\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"03\",\n      \"subject\": \"Chemistry\",\n      \"syllabus\": \"Ch 1, 2, 3 & Ch 4\",\n      \"deadline_notebook\": \"2026-09-08\",\n      \"deadline_tests\": \"2026-09-11\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"04\",\n      \"subject\": \"Computer\",\n      \"syllabus\": \"Ch 1, 2, 4 & 5\",\n      \"deadline_notebook\": \"2026-08-31\",\n      \"deadline_tests\": \"2026-09-18\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"05\",\n      \"subject\": \"Urdu\",\n      \"syllabus\": \"2 Ghazals & 01 Ch\",\n      \"deadline_notebook\": \"2026-09-20\",\n      \"deadline_tests\": \"2026-09-25\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"06\",\n      \"subject\": \"Islamiat\",\n      \"syllabus\": \"Surah Infaal 06 Asbaaq\",\n      \"deadline_notebook\": \"2026-09-10\",\n      \"deadline_tests\": \"2026-09-17\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"07\",\n      \"subject\": \"Ma"}], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 483, "size_kb": 0.47, "modified_timestamp": 1789821204.0526652, "snippet": "{\n  \"tenant_id\": \"tenant_9019162\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0,\n  \"used_tokens\": 0,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T10:47:52.552960+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": []\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}, "tenant_9614932": {"tenant_id": "tenant_9614932", "total_documents": 1, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 0, "deadlines": 0, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [], "deadlines": [], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 483, "size_kb": 0.47, "modified_timestamp": 1789821204.0607274, "snippet": "{\n  \"tenant_id\": \"tenant_9614932\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0,\n  \"used_tokens\": 0,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T10:47:52.553765+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": []\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}, "tenant_9250202": {"tenant_id": "tenant_9250202", "total_documents": 1, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 0, "deadlines": 0, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [], "deadlines": [], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 483, "size_kb": 0.47, "modified_timestamp": 1789821204.0597274, "snippet": "{\n  \"tenant_id\": \"tenant_9250202\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0,\n  \"used_tokens\": 0,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T10:47:52.554237+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": []\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}, "tenant_demo": {"tenant_id": "tenant_demo", "total_documents": 2, "counts": {"app_rules": 0, "persona": 0, "milestones": 0, "routines": 0, "deadlines": 1, "general": 1}, "categories": {"app_rules": [], "persona": [], "milestones": [], "routines": [], "deadlines": [{"file_name": "deadlines.json", "relative_path": "deadlines.json", "extension": ".json", "category": "deadlines", "category_label": "Exams & Deadlines", "size_bytes": 3418, "size_kb": 3.34, "modified_timestamp": 1789821204.0660057, "snippet": "{\n  \"academic_session\": \"2026-2027\",\n  \"date_modified\": \"September 05, 2026\",\n  \"deadlines\": [\n    {\n      \"serial_number\": \"01\",\n      \"subject\": \"English\",\n      \"syllabus\": \"Ch 1-10 &Grammar\",\n      \"deadline_notebook\": \"10 Sep, 2026\",\n      \"deadline_tests\": \"15 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"02\",\n      \"subject\": \"Physics\",\n      \"syllabus\": \"Ch 1, 2, 3, 4 & 7\",\n      \"deadline_notebook\": \"06 Sep, 2026\",\n      \"deadline_tests\": \"15 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"03\",\n      \"subject\": \"Chemistry\",\n      \"syllabus\": \"Ch 1, 2, 3 & Ch 4\",\n      \"deadline_notebook\": \"08 Sep, 2026\",\n      \"deadline_tests\": \"11 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"04\",\n      \"subject\": \"Computer\",\n      \"syllabus\": \"Ch 1, 2, 4 & 5\",\n      \"deadline_notebook\": \"31 Aug, 2026\",\n      \"deadline_tests\": \"18 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"05\",\n      \"subject\": \"Urdu\",\n      \"syllabus\": \"2 Ghazals & 01 Ch\",\n      \"deadline_notebook\": \"20 Sep, 2026\",\n      \"deadline_tests\": \"25 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_number\": \"06\",\n      \"subject\": \"Islamiat\",\n      \"syllabus\": \"Surah Infaal 06 Asbaaq\",\n      \"deadline_notebook\": \"10 Sep, 2026\",\n      \"deadline_tests\": \"17 Sep, 2026\",\n      \"current_status\": \"In Progress\"\n    },\n    {\n      \"serial_num"}], "general": [{"file_name": "billing_ledger.json", "relative_path": "billing_ledger.json", "extension": ".json", "category": "general", "category_label": "General Reference Materials", "size_bytes": 1312, "size_kb": 1.28, "modified_timestamp": 1789821204.0657275, "snippet": "{\n  \"tenant_id\": \"tenant_demo\",\n  \"currency\": \"USD\",\n  \"allocated_credits\": 15.0,\n  \"allocated_tokens\": 150000,\n  \"used_credits\": 0.0487,\n  \"used_tokens\": 7344,\n  \"warning_threshold_pct\": 75,\n  \"critical_threshold_pct\": 90,\n  \"account_locked\": false,\n  \"lock_reason\": null,\n  \"last_updated\": \"2026-09-19T09:17:05.803984+00:00\",\n  \"rates\": {\n    \"executive_report\": 0.015,\n    \"kids_summary\": 0.008,\n    \"weekly_reward\": 0.025,\n    \"token_cost_per_1k\": 0.0001\n  },\n  \"transactions\": [\n    {\n      \"timestamp\": \"2026-09-19T09:14:53.645091+00:00\",\n      \"report_type\": \"executive_report\",\n      \"report_file\": \"Productivity_Report_2026-09-19.pdf\",\n      \"input_tokens\": 2319,\n      \"output_tokens\": 872,\n      \"total_tokens\": 3191,\n      \"cost_usd\": 0.0153\n    },\n    {\n      \"timestamp\": \"2026-09-19T09:14:53.645354+00:00\",\n      \"report_type\": \"kids_summary\",\n      \"report_file\": \"Summary_For_Kids_2026-09-19.pdf\",\n      \"input_tokens\": 2278,\n      \"output_tokens\": 424,\n      \"total_tokens\": 2702,\n      \"cost_usd\": 0.0083\n    },\n    {\n      \"timestamp\": \"2026-09-19T09:17:05.803932+00:00\",\n      \"report_type\": \"weekly_reward\",\n      \"report_file\": \"Weekly_Reward_Report_V2_2026-09-19.pdf\",\n      \"input_tokens\": 592,\n      \"output_tokens\": 859,\n      \"total_tokens\": 1451,\n      \"cost_usd\": 0.0251\n    }\n  ]\n}"}]}, "labels": {"app_rules": "App Classification Rules", "persona": "Student Persona & Levers", "milestones": "Milestones & Objectives", "routines": "Routines & Timetables", "deadlines": "Exams & Deadlines", "general": "General Reference Materials"}}}, "forms_registry": {"forms": [{"id": "daily_tracker", "title": "Daily Quest & Learning Commitment Tracker", "description": "Student daily habit review, goal commitments, and ActivityWatch telemetry synchronization.", "icon": "\ud83c\udfae", "default_roles": ["student", "admin"], "enabled": true, "is_system": true, "fields": []}, {"id": "academic_progress", "title": "Academic Progress & Test Scores Log", "description": "Parent & mentor log of test scores, syllabus coverage, and academic milestones.", "icon": "\ud83d\udcda", "default_roles": ["parent", "admin"], "enabled": true, "is_system": true, "fields": []}, {"id": "parent_feedback", "title": "Parent Observation & Weekly Quest Evaluation", "description": "Qualitative feedback on student focus, screen time balance, and bedtime discipline.", "icon": "\ud83d\udc65", "default_roles": ["parent", "admin"], "enabled": true, "is_system": true, "fields": []}], "custom_forms": []}, "changelog": {"version": "3.2.0", "codename": "Enterprise Control & Dynamic Provisioning", "release_date": "2026-09-19", "highlights": ["Web-native Superadmin Control Plane with complete tenant onboarding & password management", "Live GitHub Actions workflow monitoring and dispatch directly within the portal", "Dynamic reference document ingestion supporting the 6-tier architecture defined in readme.txt", "Declarative Superadmin Form Builder with role-based access control and tenant customization", "Resource & AI token optimization with per-tenant billing ledgers and automated account lockout", "Interactive dynamic Change Log and enterprise-grade UI/UX refinement"], "categories": [{"title": "Superadmin Onboarding & Centralized Control", "icon": "\ud83d\udee1\ufe0f", "items": ["Migrated tenant onboarding entirely to the web frontend under the Superadmin role.", "Introduced live CI/CD pipeline monitoring dashboard for GitHub Actions batch runs with execution logs.", "Enabled in-portal tenant passkey resets with client-side SHA-256 and AES re-derivation.", "Deprecated and removed manual reset-tenant-passkey.yml workflow."]}, {"title": "Dynamic Tenant Provisioning", "icon": "\ud83d\udcc2", "items": ["Implemented dynamic multi-format (.pdf, .txt, .json, .md, .csv) reference document scanning per readme.txt.", "Automatic classification into 6 context buckets: App Classification Rules, Student Persona, Milestones, Routines, Exams & Deadlines, and General Reference.", "Seamless injection of tenant context into AI habit coaching and telemetry insights engines."]}, {"title": "Superadmin Form Builder & RBAC", "icon": "\ud83d\udcdd", "items": ["Superadmin role-based access control to show, hide, and manage forms per role (Student, Parent, Admin).", "Declarative JSON Schema Form Builder allowing dynamic creation of custom feedback and quest forms.", "Tenant-specific form overrides stored in data/{tenant_id}/forms_config.json."]}, {"title": "Resource Optimization & Billing Thresholds", "icon": "\u26a1", "items": ["Optimized Gemini prompt architecture and pre-aggregated telemetry, cutting token consumption by 35%\u201350%.", "Per-tenant, per-report billing ledger tracking usage against monthly credit thresholds.", "Multi-role warning notifications at 75% and 90% budget utilization.", "Hard constraint automated account lockout when a tenant reaches 100% billing allocation."]}, {"title": "Version Visibility & Enterprise UI", "icon": "\u2728", "items": ["Dynamic Change Log modal accessible directly from the login hero badge.", "Modern enterprise design system with refined typography, micro-interactions, and accessible contrast."]}]}};
+  window.ENV_CONFIG = {"core_repo": "nooraxollc-source/kudoz-ai-v3.1", "branch": "DevelopmentV3.2", "superadmin_hash": "861b3c167d30e87c831b461d37aded9f6405d6dfea9d312697487f8032921b06", "token_admin": "pOZ6jNXASH8nOY5E4vi+CGxqW2v8QKs0+Bmhi4mjqWv1Po3ZbkeJKlcADIfgM/bkOUTd1PEXGz4q6/bVerTq3HZ8rLkH9vUVfRV2S+7yDbwgDQZJb8xQSDTTiN1pS3BaWwLL6I8l1uUk4Kunr4aW/g=="};
   let activeKeyBytes = null;
 
   async function sha256Hex(str) {
@@ -4513,9 +4605,150 @@ window.KudozSuperadmin = (function() {
   let focusedTenantId = "__all__";
   let lastRotatedKey = "";
 
-  // Target working branch - default strictly to DevelopmentV3.2
+  // --- Target Working Branch Management & Dynamic Discovery ---
+  let currentWorkingBranch = null;
+  let availableBranches = [];
+
   function getTargetBranch() {
+    if (currentWorkingBranch) return currentWorkingBranch;
+    const stored = sessionStorage.getItem("kudoz_sa_branch");
+    if (stored && stored.trim()) {
+      currentWorkingBranch = stored.trim();
+      return currentWorkingBranch;
+    }
     return (window.ENV_CONFIG && window.ENV_CONFIG.branch) || "DevelopmentV3.2";
+  }
+
+  function setTargetBranch(branchName) {
+    if (!branchName) return;
+    if (branchName === "__custom__") {
+      const custom = prompt("Enter target branch name (e.g. development, main, feature-v3.3):", getTargetBranch());
+      if (custom && custom.trim()) {
+        branchName = custom.trim();
+        if (!availableBranches.includes(branchName)) {
+          availableBranches.push(branchName);
+        }
+      } else {
+        populateBranchDropdowns();
+        return;
+      }
+    }
+    currentWorkingBranch = branchName;
+    sessionStorage.setItem("kudoz_sa_branch", branchName);
+    console.log("[Superadmin] Global target working branch set to:", currentWorkingBranch);
+    populateBranchDropdowns();
+    updateBranchUI();
+  }
+
+  function handleBranchDropdownChange(val) {
+    setTargetBranch(val);
+  }
+
+  function handleCustomBranchInput(val) {
+    if (val && val.trim()) {
+      currentWorkingBranch = val.trim();
+      sessionStorage.setItem("kudoz_sa_branch", currentWorkingBranch);
+      updateBranchUI();
+    }
+  }
+
+  function populateBranchDropdowns() {
+    const active = getTargetBranch();
+    const defaults = ["DevelopmentV3.2", "development", "main"];
+    const merged = Array.from(new Set([...defaults, ...availableBranches, active]));
+
+    const dropdownIds = ["saHeaderBranchSelect", "saModalBranchSelect"];
+    dropdownIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      let html = "";
+      merged.forEach(b => {
+        const isCurrent = (b === active);
+        html += `<option value="${b}" ${isCurrent ? 'selected' : ''}>${b}${isCurrent ? ' (Active)' : ''}</option>`;
+      });
+      html += `<option value="__custom__">➕ Type Custom Branch Name...</option>`;
+      el.innerHTML = html;
+      el.value = active;
+    });
+  }
+
+  async function fetchAvailableBranches(explicitToken) {
+    let token = explicitToken || await getDecryptedAdminToken();
+    const feedback = document.getElementById("saTokenValidationResult");
+    const coreRepo = (window.ENV_CONFIG && window.ENV_CONFIG.core_repo) || "nooraxollc-source/kudoz-ai-v3.1";
+
+    if (!token) {
+      openTokenModal();
+      if (feedback) {
+        feedback.style.display = "block";
+        feedback.style.color = "#f59e0b";
+        feedback.textContent = "Please connect an Administrative GitHub PAT to query repository branches.";
+      }
+      return;
+    }
+
+    if (feedback) {
+      feedback.style.display = "block";
+      feedback.style.color = "#38bdf8";
+      feedback.textContent = `Querying live branches from ${coreRepo}...`;
+    }
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${coreRepo}/branches?per_page=100`, {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json"
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        availableBranches = data.map(b => b.name);
+        populateBranchDropdowns();
+        updateBranchUI();
+        if (feedback) {
+          feedback.style.color = "#4ade80";
+          feedback.textContent = `✓ Discovered ${availableBranches.length} branches in ${coreRepo} (Active: ${getTargetBranch()})!`;
+        }
+      }
+    } catch (err) {
+      console.warn("[Superadmin] Fetch branches note:", err);
+      if (feedback) {
+        feedback.style.color = "#f59e0b";
+        feedback.textContent = `Could not fetch branches from API (${err.message}). You can select from defaults or type a custom branch.`;
+      }
+    }
+  }
+
+  function updateBranchUI() {
+    const branch = getTargetBranch();
+
+    // Update all dynamic span text elements across all wizards
+    document.querySelectorAll(".sa-target-branch-text").forEach(el => {
+      el.textContent = branch;
+    });
+
+    // Update specific ID review elements
+    const badge = document.getElementById("saBranchBadge");
+    const rJobs = document.getElementById("saJobsReviewBranch");
+    const rResets = document.getElementById("saResetsReviewBranch");
+    const rDocs = document.getElementById("saDocsReviewBranch");
+
+    if (badge) badge.textContent = branch;
+    if (rJobs) rJobs.textContent = branch;
+    if (rResets) rResets.textContent = branch;
+    if (rDocs) rDocs.textContent = branch;
+
+    // Synchronize select inputs
+    const headerSel = document.getElementById("saHeaderBranchSelect");
+    const modalSel = document.getElementById("saModalBranchSelect");
+    if (headerSel && headerSel.value !== branch) headerSel.value = branch;
+    if (modalSel && modalSel.value !== branch) modalSel.value = branch;
   }
 
   // Local SHA-256 helper
@@ -4557,13 +4790,14 @@ window.KudozSuperadmin = (function() {
 
   function openTokenModal() {
     const modal = document.getElementById("saTokenModal");
-    const input = document.getElementById("saPatInput");
-    const fb = document.getElementById("saTokenFeedback");
+    const input = document.getElementById("saManualTokenInput") || document.getElementById("saPatInput");
+    const fb = document.getElementById("saTokenValidationResult") || document.getElementById("saTokenFeedback");
     if (!modal) return;
     if (fb) fb.style.display = "none";
     if (input) {
       input.value = activeToken || sessionStorage.getItem("kudoz_sa_pat") || "";
     }
+    populateBranchDropdowns();
     modal.style.display = "flex";
   }
 
@@ -4573,8 +4807,8 @@ window.KudozSuperadmin = (function() {
   }
 
   async function saveAndValidateSessionToken() {
-    const input = document.getElementById("saPatInput");
-    const fb = document.getElementById("saTokenFeedback");
+    const input = document.getElementById("saManualTokenInput") || document.getElementById("saPatInput");
+    const fb = document.getElementById("saTokenValidationResult") || document.getElementById("saTokenFeedback");
     const val = input ? input.value.trim() : "";
 
     if (!val) {
@@ -4606,11 +4840,15 @@ window.KudozSuperadmin = (function() {
       sessionStorage.setItem("kudoz_sa_pat", val);
 
       updateTokenStatusUI();
+
+      // Automatically query available branches from the repository using this verified PAT
+      await fetchAvailableBranches(val);
+
       if (fb) {
         fb.style.color = "#4ade80";
         fb.textContent = `✓ Authenticated as @${userData.login}. Session PAT activated!`;
       }
-      setTimeout(closeTokenModal, 1200);
+      setTimeout(closeTokenModal, 1500);
     } catch (e) {
       if (fb) {
         fb.style.color = "#f87171";
@@ -4623,8 +4861,8 @@ window.KudozSuperadmin = (function() {
     sessionStorage.removeItem("kudoz_sa_pat");
     activeToken = null;
     updateTokenStatusUI();
-    const fb = document.getElementById("saTokenFeedback");
-    const input = document.getElementById("saPatInput");
+    const fb = document.getElementById("saTokenValidationResult") || document.getElementById("saTokenFeedback");
+    const input = document.getElementById("saManualTokenInput") || document.getElementById("saPatInput");
     if (input) input.value = "";
     if (fb) {
       fb.style.display = "block";
@@ -4718,6 +4956,8 @@ window.KudozSuperadmin = (function() {
   function init() {
     console.log("[Superadmin] Initializing Superadmin Universal Wizard Suite v3.2 on branch:", getTargetBranch());
     updateTokenStatusUI();
+    populateBranchDropdowns();
+    updateBranchUI();
     populateTenantDropdowns();
     renderTenantsDirectory();
     renderReferenceBuckets();
@@ -4725,7 +4965,13 @@ window.KudozSuperadmin = (function() {
     renderFormsRbacMatrix();
     initSchedulingUI();
     initRatesUI();
-    setTimeout(fetchLiveWorkflowRuns, 800);
+    setTimeout(async () => {
+      await fetchLiveWorkflowRuns();
+      const tok = await getDecryptedAdminToken();
+      if (tok) {
+        fetchAvailableBranches(tok);
+      }
+    }, 800);
   }
 
   // --- Tenant Dropdown & Cockpit Population ---
@@ -6742,7 +6988,14 @@ window.KudozSuperadmin = (function() {
     openDispatchModal,
     closeDispatchModal,
     executeWorkflowDispatch,
-    jumpToPasskeyReset
+    jumpToPasskeyReset,
+    getTargetBranch,
+    setTargetBranch,
+    handleBranchDropdownChange,
+    handleCustomBranchInput,
+    populateBranchDropdowns,
+    fetchAvailableBranches,
+    updateBranchUI
   };
 })();
 
@@ -6785,6 +7038,13 @@ window.renderBillingDashboard = window.KudozSuperadmin.renderBillingDashboard;
 window.saTopUpCredits = window.KudozSuperadmin.saTopUpCredits;
 window.saToggleAccountLock = window.KudozSuperadmin.saToggleAccountLock;
 window.jumpToPasskeyReset = window.KudozSuperadmin.jumpToPasskeyReset;
+window.getTargetBranch = window.KudozSuperadmin.getTargetBranch;
+window.setTargetBranch = window.KudozSuperadmin.setTargetBranch;
+window.handleBranchDropdownChange = window.KudozSuperadmin.handleBranchDropdownChange;
+window.handleCustomBranchInput = window.KudozSuperadmin.handleCustomBranchInput;
+window.fetchAvailableBranches = window.KudozSuperadmin.fetchAvailableBranches;
+window.updateBranchUI = window.KudozSuperadmin.updateBranchUI;
+
 
 </script>
 </body>
